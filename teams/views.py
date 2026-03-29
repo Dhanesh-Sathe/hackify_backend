@@ -7,9 +7,12 @@ from .serializers import (
     TeamSerializer, 
     TeamCreateSerializer,
     TeamInvitationSerializer,
-    AssignMentorSerializer
+    AssignMentorSerializer,
+    SendInvitationSerializer
 )
 from django.contrib.auth import get_user_model
+from .utils import send_team_invitation_email
+
 
 User = get_user_model()
 
@@ -79,25 +82,50 @@ def send_invitation(request, team_id):
     if team.is_full:
         return Response({'error': 'Team is full'}, status=status.HTTP_400_BAD_REQUEST)
     
-    invited_user_id = request.data.get('invited_user_id')
+    # Validate email input
+    serializer = SendInvitationSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    email = serializer.validated_data['email']
+    
+    # Find user by email
     try:
-        invited_user = User.objects.get(pk=invited_user_id, role='student')
+        invited_user = User.objects.get(email=email, role='student')
     except User.DoesNotExist:
-        return Response({'error': 'Student not found'}, status=status.HTTP_404_NOT_FOUND)
+        return Response({'error': 'Student with this email not found'}, 
+                       status=status.HTTP_404_NOT_FOUND)
+    
+    # Check if user is already a member
+    if invited_user in team.members.all():
+        return Response({'error': 'User is already a team member'}, 
+                       status=status.HTTP_400_BAD_REQUEST)
     
     # Check if already invited
     if TeamInvitation.objects.filter(team=team, invited_user=invited_user, 
                                     status='pending').exists():
-        return Response({'error': 'Invitation already sent'}, 
+        return Response({'error': 'Invitation already sent to this email'}, 
                        status=status.HTTP_400_BAD_REQUEST)
     
+    # Create invitation
     invitation = TeamInvitation.objects.create(
         team=team,
         invited_user=invited_user,
         invited_by=request.user
     )
+    
+    # Send email notification
+    try:
+        send_team_invitation_email(invitation)
+    except Exception as e:
+        # Log error but don't fail the request
+        print(f"Failed to send invitation email: {str(e)}")
+    
     serializer = TeamInvitationSerializer(invitation)
-    return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response({
+        'message': f'Invitation sent to {email}',
+        'invitation': serializer.data
+    }, status=status.HTTP_201_CREATED)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])

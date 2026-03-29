@@ -33,15 +33,19 @@ class TeamCreateSerializer(serializers.ModelSerializer):
 class TeamInvitationSerializer(serializers.ModelSerializer):
     team_name = serializers.CharField(source='team.name', read_only=True)
     invited_user_name = serializers.CharField(source='invited_user.name', read_only=True)
+    invited_user_email = serializers.CharField(source='invited_user.email', read_only=True)
     invited_by_name = serializers.CharField(source='invited_by.name', read_only=True)
     
     class Meta:
         model = TeamInvitation
         fields = [
             'id', 'team', 'team_name', 'invited_user', 'invited_user_name',
-            'invited_by', 'invited_by_name', 'status', 'created_at'
+            'invited_user_email', 'invited_by', 'invited_by_name', 'status', 'created_at'
         ]
         read_only_fields = ['invited_by', 'status']
+
+class SendInvitationSerializer(serializers.Serializer):
+    email = serializers.EmailField()
 
 class AssignMentorSerializer(serializers.Serializer):
     mentor_id = serializers.IntegerField()

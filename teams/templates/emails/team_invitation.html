@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+        .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
+        .team-box { background: white; border-left: 4px solid #4facfe; padding: 20px; margin: 20px 0; border-radius: 5px; }
+        .info-row { margin: 10px 0; }
+        .label { font-weight: bold; color: #666; }
+        .footer { text-align: center; margin-top: 20px; color: #666; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 Team Invitation</h1>
+        </div>
+        <div class="content">
+            <h2>Hello {{ invited_user_name }},</h2>
+            <p><strong>{{ invited_by_name }}</strong> has invited you to join their team on Hackify!</p>
+            
+            <div class="team-box">
+                <div class="info-row">
+                    <span class="label">Team Name:</span> {{ team_name }}
+                </div>
+                <div class="info-row">
+                    <span class="label">Description:</span> {{ team_description }}
+                </div>
+                <div class="info-row">
+                    <span class="label">Current Members:</span> {{ member_count }}/{{ max_members }}
+                </div>
+                <div class="info-row">
+                    <span class="label">Invited By:</span> {{ invited_by_name }} ({{ invited_by_email }})
+                </div>
+            </div>
+            
+            <p>Log in to your Hackify account to accept or decline this invitation.</p>
+            
+            <p>Looking forward to having you on the team! 🚀</p>
+            
+            <p>Best regards,</p>
+            <p><strong>The Hackify Team</strong></p>
+        </div>
+        <div class="footer">
+            <p>© 2026 Hackify. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>
