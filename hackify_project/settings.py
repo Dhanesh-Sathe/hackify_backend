@@ -87,39 +87,21 @@ WSGI_APPLICATION = 'hackify_project.wsgi.application'
 
 # settings.py
 
-import os
-import dj_database_url
-
-# Remove or comment out the old SQLite config:
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
-
 # Add this instead:
-DATABASE_URL = os.getenv('DATABASE_URL')
-if DATABASE_URL:
-    # On Render — uses PostgreSQL via DATABASE_URL env var
-    DATABASES = {
-        'default': dj_database_url.config(
-            default=DATABASE_URL,
-            conn_max_age=600,
-            conn_health_checks=True,
-        )
-    }
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'hackify',
-        'USER': 'postgres',
-        'PASSWORD': os.getenv('Password'),  # your pgAdmin postgres password
-        'HOST': 'localhost',
-        'PORT': '5432',
-    }
-}
+import dj_database_url
+import os
 
+DATABASE_URL = os.getenv('DATABASE_URL')
+print(f"DATABASE_URL present: {DATABASE_URL is not None}")  # Debug line
+print(f"DATABASE_URL value: {DATABASE_URL}")  # Debug line
+
+DATABASES = {
+    'default': dj_database_url.config(
+        default=DATABASE_URL,
+        conn_max_age=600,
+        conn_health_checks=True,
+    )
+}
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
 
