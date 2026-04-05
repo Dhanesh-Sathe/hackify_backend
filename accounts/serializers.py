@@ -2,7 +2,9 @@ from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from .models import StudentProfile, FacultyProfile, OTP
 import random
+import logging
 from django.conf import settings
+from django.core.mail import send_mail
 
 User = get_user_model()
 
@@ -20,12 +22,10 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         otp_code = str(random.randint(100000, 999999))
         OTP.objects.create(user=user, code=otp_code)
         
-        # Send OTP email (will print in console)
-        from django.core.mail import send_mail
-        # Send OTP email
-        send_mail(
-        subject='Hackify - Email Verification Code',
-        message=f'''
+        try:
+            send_mail(
+                subject='Hackify - Email Verification Code',
+                message=f'''
         Hello {user.name},
 
         Welcome to Hackify! 
@@ -39,10 +39,12 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         Best regards,
         Hackify Team
         ''',
-        from_email=settings.DEFAULT_FROM_EMAIL,
-        recipient_list=[user.email],
-        fail_silently=False,
-        )
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[user.email],
+                fail_silently=False,
+            )
+        except Exception:
+            logging.exception('Failed to send registration OTP email')
         
         return user
 

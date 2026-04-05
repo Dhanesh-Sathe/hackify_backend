@@ -27,7 +27,14 @@ User = get_user_model()
 def register(request):
     serializer = UserRegistrationSerializer(data=request.data)
     if serializer.is_valid():
-        user = serializer.save()
+        try:
+            user = serializer.save()
+        except Exception as exc:
+            return Response(
+                {'error': 'Registration failed', 'detail': str(exc)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
         return Response({
             'message': 'Registration successful. OTP sent to email.',
             'email': user.email
